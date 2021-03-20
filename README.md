@@ -12,12 +12,14 @@ this application can download all updated information and Airfoils database from
 ## how does it work 
 
 In select Airfoil tab, set geometry of the desired airfoil, such as the max chamber, max thickness, and span
-set desired aerodynamic condiction
-find button will list the group airfoil with these conditions
 
-can click on each of airfoil on left tree and information alongside the graphs will be display 
+Set desired aerodynamic condiction
 
-all information regards the Cl & Cd coefficient with be summarized 
+Find button will list the group of airfoils with these conditions
+
+Can click on each of airfoil on left tree and information alongside the graphs will be display 
+
+All information regards the Cl & Cd coefficient with be summarized 
 
 you can check the compare checkbox at the bottom to compare selected airfoil
 
