@@ -8,7 +8,7 @@ import matplotlib.pyplot as plt
 AllFig=[plt.figure(i) for i in range(6)]
 
 from bs4 import BeautifulSoup  
-import requests ,os,pickle,urllib,re,sys,json
+import requests ,os,pickle,urllib,re,sys,json,math
 from urllib.parse import urlparse
 
 
@@ -29,7 +29,8 @@ cm_in_max_lift        =0
 
 WingLenght=1
 Chord=1
-#A_ref=WingLenght*Chord
+taper_angle=90
+A_ref=WingLenght*(Chord-.5*WingLenght*math.tan(taper_angle * math.pi / 180))
 Velocity=0
 
 v_scale=[1,1.60934]
@@ -478,7 +479,7 @@ while True:     # Event Loop
           cruise_cm     =CM[j]          #.5*p*v2*A*cl
           cruise_lift=.5*cruise_cl*AirDencity*Velocity*Velocity*WingLenght*Chord
           cruise_drag=.5*cruise_cd*AirDencity*Velocity*Velocity*WingLenght*Chord
-          cruise_s=f'Cruise Lift/Drag at AOA {cruise_alfa} ={cruise_lift:.2f} , {cruise_drag:.2f} N {cruise_cl} {cruise_cd}' 
+          cruise_s=f'Cruise Lift/Drag at AOA {cruise_alfa:5.2f} ({cruise_lift:.2f} , {cruise_drag:.2f}) N {cruise_cl} {cruise_cd}' 
           window['cruise_info'].Update(cruise_s)
           
           
@@ -492,7 +493,7 @@ while True:     # Event Loop
           cm_in_max_lift        =CM[j]
           Max_Lift   =     .5*max_lift_cl*AirDencity*Velocity*Velocity*WingLenght*Chord
           Max_Drag   =.5*drag_in_max_lift*AirDencity*Velocity*Velocity*WingLenght*Chord
-          max_lift_s=f'Max    Lift/Drag at AOA {alfa_in_max_lift} ={Max_Lift:.2f} , {Max_Drag:.2f} N,{max_lift_cl} {drag_in_max_lift} '
+          max_lift_s=f'Max    Lift/Drag at AOA {alfa_in_max_lift:5.2f} ({Max_Lift:.2f} , {Max_Drag:.2f}) N,{max_lift_cl} {drag_in_max_lift} '
           window['max_lift_info'].Update(max_lift_s)
           
           draw_figure_w_toolbar(alpha,CD,'Cd vs alpha','CD','alpha',2,window['fig_cdalfa'].TKCanvas, window['controls_cdalfa'].TKCanvas)
@@ -523,6 +524,7 @@ while True:     # Event Loop
         window['Tree'].update(t)
     elif event=='doCompare':
         DoCompare=window['doCompare'].Get()
+        print('compare multi ',DoCompare)
     
     elif event=='loadObject':
         airfoilJson=loadJson()
