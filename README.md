@@ -6,3 +6,5 @@ it can be run on web and any operation os
 to run program simply execute the airfoilDesign.py in python shell 
 this application can download all updated information and Airfoils database from [AirfoilTools.com](http://www.airfoiltools.com/search/airfoils?m=a), however the compress file of whole database available in Zip file
 
+![Image](https://raw.githubusercontent.com/mkeyno/easy_airfoil_selection/main/src/1.png) 
+![Image](https://raw.githubusercontent.com/mkeyno/easy_airfoil_selection/main/src/2.png) 
