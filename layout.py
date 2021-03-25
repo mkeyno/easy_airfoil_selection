@@ -3,7 +3,8 @@ import PySimpleGUI as sg
 treedata = sg.TreeData()
 
 tab_lift = [
-                 [sg.Text('lift calculation')],
+                 [sg.Text('lift calculation \u0394  \u03A9  \u03C0  \u03F4  \u03BB  \u03B8 	 \u03B1 	 \u03B1 \u03B2 \u03B3  \u03B4  \u03B5  \u03B6  \u03B7  \u03B8  \u03B9 	 \u03BA 	 \u03BB 	 \u03BC  \u03BD  \u03BE  \u03BF  \u03C0  \u03C1  \u03C2  \u03C3  \u03C4  \u03C5  \u03C6  \u03C7  \u03C8  \u03C9  ')],
+                 [sg.Text(' Ξ Θ Λ Π Φ Ψ ϴ Ω')],
  ]
 
 tab_select = [
@@ -11,9 +12,10 @@ tab_select = [
                  [sg.Text('Search the 1638 airfoils in the databases filtering by name, thickness and camber')],
                  [sg.Text('Maximum thickness(%)'),sg.Input(default_text='66.4', size=(5, 1), key='max_thick') ,sg.Text('Minimum  thickness(%)'),sg.Input(default_text='2', size=(5, 1), key='min_thick') ,sg.Text('(66.4 - 2.0)' ),sg.Button('Set',size=(10, 1),key='setThick')],
                  [sg.Text('Maximum    camber(%)'),sg.Input(default_text='16.4', size=(5, 1), key='max_camber'),sg.Text('Minimum     camber(%)'),sg.Input(default_text='0', size=(5, 1), key='min_camber'),sg.Text('(16.4 - 0.0)' )],
-                 [sg.Text('Wing Lenght                '),sg.Input(default_text='1', size=(5, 1), key='wing'),sg.Text(' m',key='wing_unit'),sg.Text(' '*60 ),sg.Button('Set',size=(10, 1),key='setWing')],
-                 [sg.Text('Reynolds number calculator   Re=(v l) / \u03BD                 '),sg.Radio('metric', "RADIO1",key='metric', enable_events=True,default=True, size=(5, 1)),sg.Radio('imperial ', "RADIO1",key='imperial',enable_events=True),sg.Button('Calculate',size=(10, 1),key='rey_cal'), sg.Text(' '*50,key='rey_rezalt'), ],
-                 [sg.Text('Velocity'),sg.Input(default_text='36', size=(4, 1), key='velocity'),sg.Text('km/h',key='vel_unit'),sg.Text('Chord width'),sg.Input(default_text='20', size=(3, 1), key='chord'),sg.Text('cm',key='cord_unit'),sg.Text('temperatures'),sg.Combo((-10,0,10,20),change_submits=True,default_value=20,key='temp'), sg.Text('Kinematic Viscosity'),sg.Text('1.5111E-5',key='Viscosity')],
+                 [sg.Text('Wing Lenght                '),sg.Input(default_text='1', size=(5, 1), key='wing'),sg.Text(' m       ',key='wing_unit'),sg.Radio('metric', "RADIO1",key='metric', enable_events=True,default=True, size=(5, 1)),sg.Radio('imperial ', "RADIO1",key='imperial',enable_events=True),sg.Text(' '*10 ),sg.Button('Set',size=(10, 1),key='setWing')],
+                 
+                 [sg.Text('Velocity'),sg.Input(default_text='36', size=(4, 1), key='velocity'),sg.Text('km/h',key='vel_unit'),sg.Text('Chord width'),sg.Input(default_text='20', size=(3, 1), key='chord'),sg.Text('cm',key='cord_unit'),sg.Text('temperatures'),sg.Combo((-10,0,10,20),change_submits=True,default_value=20,key='temp'), sg.Text('Kinematic Viscosity, Air Dencity'),sg.Text('1.5111E-5, 1.2041 ',key='Viscosity')],
+                 [sg.Text('Reynolds Num Re=(v l) /\u03BD'),sg.Input(default_text='--',justification='center',size=(25, 1),disabled=True,key='rey_rezalt'),sg.Text('Mach Num:'),sg.Input(default_text='-',size=(4, 1),disabled=True,key='mach_num'),sg.Button('Calculate',size=(10, 1),key='rey_cal'),  ],
                  [sg.Text(' '*150,key='cruise_info')],
                  [sg.Text(' '*150,key='max_lift_info')],
                  [sg.Text('Find nominated Airfoil'),sg.Button('Find',size=(10, 1),key='findAirfols') ],
