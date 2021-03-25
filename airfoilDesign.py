@@ -40,7 +40,8 @@ w_scale=[1,0.3048]
 currentPath, filename = os.path.split(os.path.abspath(__file__))
 defultFolder=currentPath+'\AirfoilData'
 alpha=[];CL=[];CD=[];CDp=[];CM=[];Top_Xtr=[];Bot_Xtr=[]
-
+sound_speed={-10:325.18,0:331.30,10:337.31,20:343.21}
+Mach_num=0
 Viscosity={-10:1.2462E-5,0:1.3324E-5,10:1.4207E-5,20:1.5111E-5}
 Air      ={-10:1.3413   ,0:1.2922   ,10:1.2466   ,20:1.2041   }
 AirDencity                                         = 1.2041
@@ -341,6 +342,7 @@ def find_reynolds_location(rey):
     else     :    
         s=f'{ReynoldSeries[j-1]:,} < {rey:,} < {ReynoldSeries[j]:,}'
         v=ReynoldSeries[j]
+    #ss=f'{s:>60}'
     return v, s
     
     
@@ -390,10 +392,10 @@ def find_nominate_sorted_airfoil():
     list_unsorted={}
     for airfoil in airfoilJson:
        A_Mc=float(airfoilJson[airfoil]['Max_camber'])
-       A_Mt=float(airfoilJson[airfoil]['Max_thickness'])
-       if A_Mc <= max_camber and A_Mc >= min_camber and A_Mt <= max_thick and A_Mt >= min_thick :                      
+       A_Mt=float(airfoilJson[airfoil]['Max_thickness'])       
+       if A_Mc <= max_camber and A_Mc >= min_camber and A_Mt <= max_thick and A_Mt >= min_thick :             
             for i in range(len(airfoilJson[airfoil]['AllAirfoilsPage'])):
-                A_rey  =int(airfoilJson[airfoil]['AllAirfoilsPage'][i]['Reynolds'])                                
+                A_rey  =int(airfoilJson[airfoil]['AllAirfoilsPage'][i]['Reynolds'])               
                 if r_scop==A_rey:
                     dicc={}
                     dicc['name']=airfoil
@@ -414,6 +416,7 @@ def find_nominate_sorted_airfoil():
         # Insert(parent, key      , text     , values   , icon=None       )
         T.Insert(''       , v['name'], v['name'], values=[],  icon=folder_icon)
         T.Insert(v['name'], v['file'], v['file'], values=[k], icon=file_icon)
+        
     window['Tree'].update(T  )
     
     
@@ -460,13 +463,13 @@ while True:     # Event Loop
                  datFilePath=os.path.join(defultFolder+'\\'+nameOfAirfoil, f)
 
           #print(pathTxtFile,datFilePath)
-      
+          
           X_cor,Y_cor=getXYcordinate(datFilePath) 
           content,Reynolds,Ncrit,alpha,CL,CD,CDp,CM,Top_Xtr,Bot_Xtr=loadInfoOfAirfoilPage(pathTxtFile)      
           DoCompare=window['doCompare'].Get()
           window['AirfoilInfo'].Update(value=content) #read file then update GUI and lists
-            
-          infos=f'{nameOfAirfoil}: Max Chamber={Max_camber}% at {Max_camber_L}% , Max Thickness={Max_thickness}% at {Max_thickness_L}%  '
+          actual_thickness=float(Max_thickness)*Chord  
+          infos=f'{nameOfAirfoil}: Max Thickness={actual_thickness:.2f}cm({Max_thickness}%) at {Max_thickness_L}%,   Max Chamber={Max_camber}% at {Max_camber_L}%'
           window['AirFoil_info'].Update(infos)
             
           draw_figure_w_toolbar(CL,CD,'Cl vs Cd','CL','CD'         ,0,window['fig_clcd'].TKCanvas  , window['controls_clcd'].TKCanvas)
@@ -477,9 +480,9 @@ while True:     # Event Loop
           cruise_cd     =CD[j] 
           cruise_alfa   =alpha[j]
           cruise_cm     =CM[j]          #.5*p*v2*A*cl
-          cruise_lift=.5*cruise_cl*AirDencity*Velocity*Velocity*WingLenght*Chord
-          cruise_drag=.5*cruise_cd*AirDencity*Velocity*Velocity*WingLenght*Chord
-          cruise_s=f'Cruise Lift/Drag at AOA {cruise_alfa:5.2f} ({cruise_lift:.2f} , {cruise_drag:.2f}) N {cruise_cl} {cruise_cd}' 
+          cruise_lift=.5*cruise_cl*AirDencity*Velocity*Velocity*WingLenght*Chord*0.1019
+          cruise_drag=.5*cruise_cd*AirDencity*Velocity*Velocity*WingLenght*Chord*0.1019
+          cruise_s=f'Cruise Lift/Drag at AOA {cruise_alfa:5.2f} ({cruise_lift:.2f} , {cruise_drag:.2f}) Kg {cruise_cl} {cruise_cd}' 
           window['cruise_info'].Update(cruise_s)
           
           
@@ -491,9 +494,9 @@ while True:     # Event Loop
           drag_in_max_lift      =CD[j]
           alfa_in_max_lift      =alpha[j]
           cm_in_max_lift        =CM[j]
-          Max_Lift   =     .5*max_lift_cl*AirDencity*Velocity*Velocity*WingLenght*Chord
-          Max_Drag   =.5*drag_in_max_lift*AirDencity*Velocity*Velocity*WingLenght*Chord
-          max_lift_s=f'Max    Lift/Drag at AOA {alfa_in_max_lift:5.2f} ({Max_Lift:.2f} , {Max_Drag:.2f}) N,{max_lift_cl} {drag_in_max_lift} '
+          Max_Lift   =     .5*max_lift_cl*AirDencity*Velocity*Velocity*WingLenght*Chord*0.1019
+          Max_Drag   =.5*drag_in_max_lift*AirDencity*Velocity*Velocity*WingLenght*Chord*0.1019
+          max_lift_s=f'Max    Lift/Drag at AOA {alfa_in_max_lift:5.2f} ({Max_Lift:.2f} , {Max_Drag:.2f}) Kg,{max_lift_cl} {drag_in_max_lift} '
           window['max_lift_info'].Update(max_lift_s)
           
           draw_figure_w_toolbar(alpha,CD,'Cd vs alpha','CD','alpha',2,window['fig_cdalfa'].TKCanvas, window['controls_cdalfa'].TKCanvas)
@@ -540,7 +543,7 @@ while True:     # Event Loop
         print(WingLenght)
         
     elif event=='rey_cal':
-        Velocity    =check_number(values['velocity'])*3.6
+        Velocity    =check_number(values['velocity'])/3.6
         Chord       =check_number(values['chord'])/100
         WingLenght  =check_number(values['wing'])
         
@@ -551,15 +554,18 @@ while True:     # Event Loop
         temp=values['temp']  
         Reynolds=int((Chord*Velocity)/Viscosity[temp])
         AirDencity=Air[temp]
-        print(Reynolds)
+        
+        Mach_num=Velocity/sound_speed[temp]
+        print(f'R:{Reynolds},  v:{Velocity:.2f},  c:{Chord},  L:{WingLenght},  m:{Mach_num:.2f}')
         _,s=find_reynolds_location(Reynolds)
         #print(v,L,Viscosity[temp],s,Reynolds)
         window['rey_rezalt'].update(s) 
+        window['mach_num'].update(f'{Mach_num:.2f}')
     
     elif event=='temp':
         temp=values['temp']
-        print(temp)
-        window['Viscosity'].update(Viscosity[temp])
+        st=f'{Viscosity[temp]},{Air[temp]}'
+        window['Viscosity'].update(st)
 
     elif event=='setThick':
         
