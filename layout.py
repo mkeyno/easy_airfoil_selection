@@ -8,16 +8,17 @@ tab_lift = [
  ]
 
 tab_select = [
-                 [sg.Text('Load All Airfoil Data'),sg.Button('Load',size=(10, 1),key='loadObject')],
-                 [sg.Text('Search the 1638 airfoils in the databases filtering by name, thickness and camber')],
-                 [sg.Text('Maximum thickness(%)'),sg.Input(default_text='66.4', size=(5, 1), key='max_thick') ,sg.Text('Minimum  thickness(%)'),sg.Input(default_text='2', size=(5, 1), key='min_thick') ,sg.Text('(66.4 - 2.0)' ),sg.Button('Set',size=(10, 1),key='setThick')],
-                 [sg.Text('Maximum    camber(%)'),sg.Input(default_text='16.4', size=(5, 1), key='max_camber'),sg.Text('Minimum     camber(%)'),sg.Input(default_text='0', size=(5, 1), key='min_camber'),sg.Text('(16.4 - 0.0)' )],
-                 [sg.Text('Wing Lenght                '),sg.Input(default_text='1', size=(5, 1), key='wing'),sg.Text(' m       ',key='wing_unit'),sg.Radio('metric', "RADIO1",key='metric', enable_events=True,default=True, size=(5, 1)),sg.Radio('imperial ', "RADIO1",key='imperial',enable_events=True),sg.Text(' '*10 ),sg.Button('Set',size=(10, 1),key='setWing')],
+                 [sg.Text('Load All Airfoil Data'),sg.Button('Load',size=(10, 1),key='loadObject'),sg.Text('              '*5),sg.Radio('metric', "RADIO1",key='metric', enable_events=True,default=True, size=(5, 1)),sg.Radio('imperial ', "RADIO1",key='imperial',enable_events=True)],
+                 [sg.Text('     Search the 1638 airfoils in the databases filtering by name, thickness and camber')],
+                 [sg.Text('Maximum thickness(%)'),sg.Input(default_text='66.4', size=(5, 1), key='max_thick') ,sg.Text('      Minimum  thickness(%)   '),sg.Input(default_text='2', size=(5, 1), key='min_thick') ,sg.Text('(66.4 - 2.0)            ' ),sg.Button('Geometry Set',size=(13, 1))],
+                 [sg.Text('Maximum    camber(%)'),sg.Input(default_text='16.4', size=(5, 1), key='max_camber'),sg.Text('      Minimum     camber(%)   '),sg.Input(default_text='0', size=(5, 1), key='min_camber'),sg.Text('(16.4 - 0.0)' )],
+                 [sg.Text('Wing Lenght                '),sg.Input(default_text='1', size=(5, 1), key='wing'),sg.Text('m',key='wing_unit'),sg.Text('Minimum thickness        ' ),sg.Input(default_text='16', size=(5, 1), key='minThick'),sg.Text('cm',key='thick_unit')],
                  
                  [sg.Text('Velocity'),sg.Input(default_text='36', size=(4, 1), key='velocity'),sg.Text('km/h',key='vel_unit'),sg.Text('Chord width'),sg.Input(default_text='20', size=(3, 1), key='chord'),sg.Text('cm',key='cord_unit'),sg.Text('temperatures'),sg.Combo((-10,0,10,20),change_submits=True,default_value=20,key='temp'), sg.Text('Kinematic Viscosity, Air Dencity'),sg.Text('1.5111E-5, 1.2041 ',key='Viscosity')],
                  [sg.Text('Reynolds Num Re=(v l) /\u03BD'),sg.Input(default_text='--',justification='center',size=(25, 1),disabled=True,key='rey_rezalt'),sg.Text('Mach Num:'),sg.Input(default_text='-',size=(4, 1),disabled=True,key='mach_num'),sg.Button('Calculate',size=(10, 1),key='rey_cal'),  ],
                  [sg.Text(' '*150,key='cruise_info')],
                  [sg.Text(' '*150,key='max_lift_info')],
+                 [sg.Text(' '*150,key='delta_alfa')],
                  [sg.Text('Find nominated Airfoil'),sg.Button('Find',size=(10, 1),key='findAirfols') ],
                  [sg.Text('Shell output')],
                  [sg.Output(size=(100, 14))],
@@ -89,7 +90,7 @@ tab_group_layout = [[
 layout = [
             [sg.Text('Airfoles and Information Browser')],
             [
-                sg.Tree(data=treedata,headings=['Info', ],auto_size_columns=True,num_rows=27,col0_width=19,key='Tree',show_expanded=False,enable_events=True),
+                sg.Tree(data=treedata,headings=['Info','\u0394\u03B1' ],auto_size_columns=True,num_rows=27,col0_width=19,key='Tree',show_expanded=False,enable_events=True),
                 sg.TabGroup(tab_group_layout,enable_events=True,key='TABGROUP'),
              ],  
              [sg.Button('Ok'), sg.Button('Cancel'), sg.Button('Load Data',key='LoadAirfoilDirectory'),sg.Checkbox('Compare ',enable_events=True,key='doCompare'),
