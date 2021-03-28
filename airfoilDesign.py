@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-__version__=.01
+__version__=.03
 
 from layout import *
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg, NavigationToolbar2Tk
@@ -10,7 +10,7 @@ AllFig=[plt.figure(i) for i in range(6)]
 from bs4 import BeautifulSoup  
 import requests ,os,pickle,urllib,re,sys,json,math
 from urllib.parse import urlparse
-
+import numpy as np
 
 DoCompare=False
 Reynolds=10000
@@ -169,7 +169,9 @@ def getXYcordinate(path):
                 y.append(s[1])
                 #print('   ',s,end='')
     #print(x);print(y)
-    return x,y
+    np_x = np.array(x)
+    np_y = np.array(y)
+    return np_x,np_y
 
 
 def loadInfoOfAirfoilPage(path):
@@ -258,24 +260,35 @@ def grabAirfoilDataFromFile3(index):
     Reynolds,Ncrit,alpha,CL,CD,CDp,CM,Top_Xtr,Bot_Xtr=loadInfoOfAirfoilPage(FolderLocation,filename)
     #print(f'{filename:40},Reynolds={Reynolds:>10}, Ncrit={Ncrit}')
     max_cl,i        =find_max(CL)
-    max_cl_alfa=                    alpha[i]
-    max_cl_cm           =CM[i]
+    max_cl_alfa     =alpha[i]
+    max_cl_cm       =CM[i]
+    
     max_clOnCd,i    =find_max_div(CL,CD)
-    max_clOnCd_alfa=                alpha[i]
-    max_clOnCd_cm       =CM[i]
+    max_clOnCd_alfa =alpha[i]
+    max_clOnCd_cm   =CM[i]
+    cl_cruise       =CL[i]
+    
+    delta_alfa=max_cl_alfa-max_clOnCd_alfa
+    
     min_cm,i        =find_min(CM)
-    min_cm_alfa=                    alpha[i]
-    max_cm_clcd         =CL[i]/CD[i]
+    min_cm_alfa     =alpha[i]
+    max_cm_clcd     =CL[i]/CD[i]
     
     Page['filename']        =filename
     Page['Reynolds']        =Reynolds
     Page['Ncrit']           =Ncrit
+    
     Page['max_cl']          =max_cl
     Page['max_cl_alfa']     =max_cl_alfa
     Page['max_cl_cm']       =max_cl_cm
+    
     Page['max_clOnCd']      =max_clOnCd
     Page['max_clOnCd_alfa'] =max_clOnCd_alfa
     Page['max_clOnCd_cm']   =max_clOnCd_cm
+    Page['cl_cruise']       =cl_cruise
+    
+    Page['delta_alfa']       =delta_alfa
+    
     Page['min_cm']          =min_cm
     Page['min_cm_alfa']     =min_cm_alfa
     Page['max_cm_clcd']     =max_cm_clcd
@@ -401,21 +414,22 @@ def find_nominate_sorted_airfoil():
                     dicc['name']=airfoil
                     dicc['file']=airfoilJson[airfoil]['AllAirfoilsPage'][i]['filename']
                     dicc['i']=i
-                    max_clcd=float(airfoilJson[airfoil]['AllAirfoilsPage'][i]['max_clOnCd'])
-                    list_unsorted[max_clcd]=dicc       
+                    dicc['delta']=float(airfoilJson[airfoil]['AllAirfoilsPage'][i]['delta_alfa'])
+                    cl_cruise=float(airfoilJson[airfoil]['AllAirfoilsPage'][i]['cl_cruise'])
+                    list_unsorted[cl_cruise]=dicc       
     #print(list_unsorted)
     #f=sorted(list_unsorted)
     dic_sorted=dict(reversed(sorted(list_unsorted.items())))
     #f=json.dumps(list_unsorted, sort_keys = True)
-    for k,v in dic_sorted.items() :
+    for clCruise,v in dic_sorted.items() :
         #print(k,v)        
         # 117.83 {'name': 'e379-il', 'file': 'xf-e379-il-200000.txt', 'i': 4}
         # 91.16 {'name': 'e379-il', 'file': 'xf-e379-il-200000-n5.txt', 'i': 3}
         # 40.11 {'name': 'sc20402-il', 'file': 'xf-sc20402-il-200000-n5.txt', 'i': 3}
         # 20.14 {'name': 'sc20402-il', 'file': 'xf-sc20402-il-200000.txt', 'i': 4}
         # Insert(parent, key      , text     , values   , icon=None       )
-        T.Insert(''       , v['name'], v['name'], values=[],  icon=folder_icon)
-        T.Insert(v['name'], v['file'], v['file'], values=[k], icon=file_icon)
+        T.Insert(''       , v['name'], v['name'], values=[]       ,  icon=folder_icon)
+        T.Insert(v['name'], v['file'], v['file'], values=[clCruise,v['delta']], icon=file_icon)
         
     window['Tree'].update(T  )
     
@@ -464,7 +478,12 @@ while True:     # Event Loop
 
           #print(pathTxtFile,datFilePath)
           
-          X_cor,Y_cor=getXYcordinate(datFilePath) 
+          X_cor,Y_cor=getXYcordinate(datFilePath)
+          #cc=Chord/1.0
+          print('Chord=',Chord)
+          #print(X_cor[20],Y_cor[20])
+          X_cor=X_cor*Chord*100 ;Y_cor=Y_cor*Chord*100
+          #print(X_cor[20],Y_cor[20])
           content,Reynolds,Ncrit,alpha,CL,CD,CDp,CM,Top_Xtr,Bot_Xtr=loadInfoOfAirfoilPage(pathTxtFile)      
           DoCompare=window['doCompare'].Get()
           window['AirfoilInfo'].Update(value=content) #read file then update GUI and lists
@@ -499,6 +518,10 @@ while True:     # Event Loop
           max_lift_s=f'Max    Lift/Drag at AOA {alfa_in_max_lift:5.2f} ({Max_Lift:.2f} , {Max_Drag:.2f}) Kg,{max_lift_cl} {drag_in_max_lift} '
           window['max_lift_info'].Update(max_lift_s)
           
+          delta_alfa=alfa_in_max_lift-cruise_alfa
+          delta_alfa_s=f'Scope of AOA(\u0394\u03B1)={delta_alfa}'
+          window['delta_alfa'].Update(delta_alfa_s)
+          
           draw_figure_w_toolbar(alpha,CD,'Cd vs alpha','CD','alpha',2,window['fig_cdalfa'].TKCanvas, window['controls_cdalfa'].TKCanvas)
           min,j=find_min(CD)
           ss=f'Min Cd({min}) happen at angle {alpha[j]}'
@@ -511,6 +534,8 @@ while True:     # Event Loop
           window['text_Cmalfa'].Update(value=ss)    
           
           draw_figure_w_toolbar(alpha,CDp,'CDp vs alpha geometry','CDp','alpha',4,window['fig_Cdpalfa'].TKCanvas, window['controls_Cdpalfa'].TKCanvas)
+          
+          
           draw_figure_w_toolbar(X_cor,Y_cor,'Drawing','X','Y',5,window['fig_draw'].TKCanvas, window['controls_draw'].TKCanvas)
       
       except Exception as e:
@@ -536,12 +561,7 @@ while True:     # Event Loop
         t=load_airfoil_dic(airfoilJson)
         #print(starting_path,t)
         window['Tree'].update(t)
-        
-    elif event=='setWing': 
-        WingLenght=check_number(values['wing'])
-        WingLenght*=w_scale[Imperial]
-        print(WingLenght)
-        
+               
     elif event=='rey_cal':
         Velocity    =check_number(values['velocity'])/3.6
         Chord       =check_number(values['chord'])/100
@@ -567,17 +587,26 @@ while True:     # Event Loop
         st=f'{Viscosity[temp]},{Air[temp]}'
         window['Viscosity'].update(st)
 
-    elif event=='setThick':
+    elif event=='Geometry Set':
         
         max_thick =check_number(values['max_thick'])#66.4
         if max_thick>66.4:max_thick =66.4
         max_camber=check_number(values['max_camber'])#16.4
         if max_camber>16.4:max_camber =16.4
-        min_thick =check_number(values['min_thick'])#2
-        if min_thick<2:min_thick =2
+        
         min_camber=check_number(values['min_camber'])#0
         if min_camber<0:min_camber =0
         
+        WingLenght=check_number(values['wing'])
+        WingLenght*=w_scale[Imperial]
+        
+        #min_thick =check_number(values['min_thick'])#2      
+        minThick=check_number(values['minThick'])
+        min_thick=int(minThick/Chord)
+        if min_thick<2:min_thick =2
+        window['min_thick'].update(min_thick)
+        
+        print('Wing Lenght=',WingLenght)        
         print(f'{min_thick}<thick<{max_thick} {min_camber}<chamber<{max_camber}')
         #window['Viscosity'].update(Viscosity[temp])
 
@@ -594,4 +623,5 @@ while True:     # Event Loop
         window['cord_unit'].update('in')
         window['vel_unit'].update('mph')
         window['wing_unit'].update('ft')
+        window['thick_unit'].update('in')
 window.close()
