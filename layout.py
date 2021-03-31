@@ -1,9 +1,15 @@
+WindowsSize=(1100,670)
 import PySimpleGUI as sg
 
 treedata = sg.TreeData()
 
 tab_lift = [
-                 [sg.Text('lift calculation \u0394  \u03A9  \u03C0  \u03F4  \u03BB  \u03B8 	 \u03B1 	 \u03B1 \u03B2 \u03B3  \u03B4  \u03B5  \u03B6  \u03B7  \u03B8  \u03B9 	 \u03BA 	 \u03BB 	 \u03BC  \u03BD  \u03BE  \u03BF  \u03C0  \u03C1  \u03C2  \u03C3  \u03C4  \u03C5  \u03C6  \u03C7  \u03C8  \u03C9  ')],
+                 [sg.Text('Download Airfoil Data from AirfoilTools.com'),],
+                 [sg.Button('Download',size=(10, 1))],
+                 [sg.Text('Progress')],
+                 [sg.ProgressBar(max_value=1636, size=(70, 25), orientation='h', key='ProgressBar')],
+                 [sg.Text('downloading...'),sg.Text(' '*150,key='fileDown'),],
+                 [sg.Text('\u0394  \u03A9  \u03C0  \u03F4  \u03BB  \u03B8 	 \u03B1 \u03B1 \u03B2 \u03B3  \u03B4  \u03B5  \u03B6  \u03B7  \u03B8  \u03B9 	 \u03BA 	 \u03BB 	 \u03BC  \u03BD  \u03BE  \u03BF  \u03C0  \u03C1  \u03C2  \u03C3  \u03C4  \u03C5  \u03C6  \u03C7  \u03C8  \u03C9  ')],
                  [sg.Text(' Ξ Θ Λ Π Φ Ψ ϴ Ω')],
  ]
 
@@ -14,7 +20,7 @@ tab_select = [
                  [sg.Text('Maximum    camber(%)'),sg.Input(default_text='16.4', size=(5, 1), key='max_camber'),sg.Text('      Minimum     camber(%)   '),sg.Input(default_text='0', size=(5, 1), key='min_camber'),sg.Text('(16.4 - 0.0)' )],
                  [sg.Text('Wing Lenght                '),sg.Input(default_text='1', size=(5, 1), key='wing'),sg.Text('m',key='wing_unit'),sg.Text('Minimum thickness        ' ),sg.Input(default_text='16', size=(5, 1), key='minThick'),sg.Text('cm',key='thick_unit')],
                  
-                 [sg.Text('Velocity'),sg.Input(default_text='36', size=(4, 1), key='velocity'),sg.Text('km/h',key='vel_unit'),sg.Text('Chord width'),sg.Input(default_text='20', size=(3, 1), key='chord'),sg.Text('cm',key='cord_unit'),sg.Text('temperatures'),sg.Combo((-10,0,10,20),change_submits=True,default_value=20,key='temp'), sg.Text('Kinematic Viscosity, Air Dencity'),sg.Text('1.5111E-5, 1.2041 ',key='Viscosity')],
+                 [sg.Text('Velocity'),sg.Input(default_text='180', size=(4, 1), key='velocity'),sg.Text('km/h',key='vel_unit'),sg.Text('Chord width'),sg.Input(default_text='60', size=(3, 1), key='chord'),sg.Text('cm',key='cord_unit'),sg.Text('temperatures'),sg.Combo((-10,0,10,20),change_submits=True,default_value=20,key='temp'), sg.Text('Kinematic Viscosity, Air Dencity'),sg.Text('1.5111E-5, 1.2041 ',key='Viscosity')],
                  [sg.Text('Reynolds Num Re=(v l) /\u03BD'),sg.Input(default_text='--',justification='center',size=(25, 1),disabled=True,key='rey_rezalt'),sg.Text('Mach Num:'),sg.Input(default_text='-',size=(4, 1),disabled=True,key='mach_num'),sg.Button('Calculate',size=(10, 1),key='rey_cal'),  ],
                  [sg.Text(' '*150,key='cruise_info')],
                  [sg.Text(' '*150,key='max_lift_info')],
@@ -30,6 +36,7 @@ tab_draw = [
                 [sg.Canvas(              key='controls_draw')],
                 [sg.T('Figure:'),sg.T(' '*100,   key='text_draw')],
                 [sg.Column(layout=[[sg.Canvas(key='fig_draw', size=(400 * 2, 400)  )]  ], background_color='#DAE0E6', pad=(0, 0) )],                   # it's important that you set this size  
+                [sg.Text(f'Save file as DXF'),sg.Button('Save',size=(10, 1),key='saveDXF'),sg.Text('Cord Lengh:'),sg.Text('     ',key='cordLengh')]
 ]
 tab_Cmalfa = [
                 [sg.T('Controls Cm vs alfa:')],
@@ -99,12 +106,12 @@ layout = [
                 ],
           ]
 
-window = sg.Window('Airfoil Analysis', layout,size=(1100,650),
+window = sg.Window('Airfoil Analysis', layout,size=WindowsSize,
                     auto_size_text=True,
                     resizable=False,
                     grab_anywhere=False)
 
-
+i=0
 if __name__ == '__main__':
     
     while True:
@@ -113,5 +120,10 @@ if __name__ == '__main__':
             
             if    event == 'close' or event is None:
                 break
-
+            elif  event == 'saveDXF' :
+                text = sg.popup_get_file('Please enter a file name',save_as = True)
+                print(text)
+            elif  event == 'Download' :
+                window['ProgressBar'].UpdateBar(i % 1636)
+                i+=10
 
